@@ -14,7 +14,17 @@
 //#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
+#include "SOIL.h"
+
+#include "Camera.h"
+
+
+
+
 
 
 // TODO: reference additional headers your program requires here
