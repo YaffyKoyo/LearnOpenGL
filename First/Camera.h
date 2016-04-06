@@ -57,6 +57,7 @@ public:
 		this->Yaw = yaw;
 		this->Pitch = pitch;
 		this->updateCameraVectors();
+		std::cout << "initial 1" << std::endl;
 	}
 	// Constructor with scalar values
 	Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch)
@@ -67,6 +68,8 @@ public:
 		this->Yaw = yaw;
 		this->Pitch = pitch;
 		this->updateCameraVectors();
+		std::cout << "initial 2" << std::endl;
+
 	}
 
 	// Returns the view matrix calculated using Eular Angles and the LookAt Matrix
