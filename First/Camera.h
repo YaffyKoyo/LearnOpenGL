@@ -6,7 +6,10 @@
 // GL Includes
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
+
+extern GLFWwindow* window;
 
 
 
@@ -43,6 +46,8 @@ public:
 	GLfloat MovementSpeed;
 	GLfloat MouseSensitivity;
 	GLfloat Zoom;
+
+	bool keys[1024];
 
 	// Constructor with vectors
 	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), 
@@ -119,12 +124,34 @@ public:
 	void ProcessMouseScroll(GLfloat yoffset)
 	{
 		if (this->Zoom >= 1.0f && this->Zoom <= 45.0f)
-			this->Zoom -= yoffset;
+			this->Zoom -=0.1* yoffset;
 		if (this->Zoom <= 1.0f)
 			this->Zoom = 1.0f;
 		if (this->Zoom >= 45.0f)
 			this->Zoom = 45.0f;
 	}
+
+	void Do_Movement()
+	{
+		// glfwGetTime is called only once, the first time this function is called
+		static double lastTime = glfwGetTime();
+
+		// Compute time difference between current and last frame
+		double currentTime = glfwGetTime();
+		float deltaTime = float(currentTime - lastTime);
+
+		// this controls
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+			this->ProcessKeyboard(FORWARD, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+			this->ProcessKeyboard(BACKWARD, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+			this->ProcessKeyboard(LEFT, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			this->ProcessKeyboard(RIGHT, deltaTime);
+		lastTime = currentTime;
+	}
+
 
 private:
 	// Calculates the front vector from the Camera's (updated) Eular Angles
