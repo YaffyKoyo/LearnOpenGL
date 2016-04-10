@@ -12,8 +12,8 @@ c:\users\yaffy\documents\visual studio 2015\projects\myopenglreviews\first\first
   Control.cpp
   Generating Code...
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-SOIL.lib(image_DXT.obj) : warning LNK4099: PDB 'SOIL.pdb' was not found with 'SOIL.lib(image_DXT.obj)' or at 'C:\Users\yaffy\Documents\Visual Studio 2015\Projects\MyOpenGLReviews\Debug\SOIL.pdb'; linking object as if no debug info
-SOIL.lib(image_helper.obj) : warning LNK4099: PDB 'SOIL.pdb' was not found with 'SOIL.lib(image_helper.obj)' or at 'C:\Users\yaffy\Documents\Visual Studio 2015\Projects\MyOpenGLReviews\Debug\SOIL.pdb'; linking object as if no debug info
-SOIL.lib(SOIL.obj) : warning LNK4099: PDB 'SOIL.pdb' was not found with 'SOIL.lib(SOIL.obj)' or at 'C:\Users\yaffy\Documents\Visual Studio 2015\Projects\MyOpenGLReviews\Debug\SOIL.pdb'; linking object as if no debug info
-SOIL.lib(stb_image_aug.obj) : warning LNK4099: PDB 'SOIL.pdb' was not found with 'SOIL.lib(stb_image_aug.obj)' or at 'C:\Users\yaffy\Documents\Visual Studio 2015\Projects\MyOpenGLReviews\Debug\SOIL.pdb'; linking object as if no debug info
-  First.vcxproj -> C:\Users\yaffy\Documents\Visual Studio 2015\Projects\MyOpenGLReviews\Debug\First.exe
+SOIL.lib(image_DXT.obj) : warning LNK4099: PDB 'SOIL.pdb' was not found with 'SOIL.lib(image_DXT.obj)' or at 'C:\Users\yaffy\documents\visual studio 2015\Projects\MyOpenGLReviews\Debug\SOIL.pdb'; linking object as if no debug info
+SOIL.lib(image_helper.obj) : warning LNK4099: PDB 'SOIL.pdb' was not found with 'SOIL.lib(image_helper.obj)' or at 'C:\Users\yaffy\documents\visual studio 2015\Projects\MyOpenGLReviews\Debug\SOIL.pdb'; linking object as if no debug info
+SOIL.lib(SOIL.obj) : warning LNK4099: PDB 'SOIL.pdb' was not found with 'SOIL.lib(SOIL.obj)' or at 'C:\Users\yaffy\documents\visual studio 2015\Projects\MyOpenGLReviews\Debug\SOIL.pdb'; linking object as if no debug info
+SOIL.lib(stb_image_aug.obj) : warning LNK4099: PDB 'SOIL.pdb' was not found with 'SOIL.lib(stb_image_aug.obj)' or at 'C:\Users\yaffy\documents\visual studio 2015\Projects\MyOpenGLReviews\Debug\SOIL.pdb'; linking object as if no debug info
+  First.vcxproj -> C:\Users\yaffy\documents\visual studio 2015\Projects\MyOpenGLReviews\Debug\First.exe
