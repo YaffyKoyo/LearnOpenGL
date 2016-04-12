@@ -35,7 +35,7 @@ int main(void)
 	//glfwWindowHint(GLFW_SAMPLES, 4);
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(WIDTH, HEIGHT, "First", NULL, NULL);
+	window = glfwCreateWindow(WIDTH, HEIGHT, "Third", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -64,12 +64,14 @@ int main(void)
 
 
 	// Build and compile our shader program
-	Shader shader("../Common/Shaders/plainModel.vs", "../Common/Shaders/plainModel.fs");
+	Shader shader("../Common/Shaders/Model.vs", "../Common/Shaders/Model.fs");
 	Shader lampShader("../Common/Shaders/Lamp.vs", "../Common/Shaders/Lamp.fs");
 
 	//Load models
 
 	Model ourModel("../Common/models/nanosuit/nanosuit.obj");
+	//Model ourModel("../Common/models/drago");
+
 
 	Model lightBulb("../Common/models/bulb/SingleBulbobj.obj");
 
@@ -110,21 +112,21 @@ int main(void)
 		glUniform3f(glGetUniformLocation(shader.Program, "pointLights[0].diffuse"), 1.0f, 1.0f, 1.0f);
 		glUniform3f(glGetUniformLocation(shader.Program, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
 		glUniform1f(glGetUniformLocation(shader.Program, "pointLights[0].constant"), 1.0f);
-		glUniform1f(glGetUniformLocation(shader.Program, "pointLights[0].linear"), 0.009);
-		glUniform1f(glGetUniformLocation(shader.Program, "pointLights[0].quadratic"), 0.0032);
+		glUniform1f(glGetUniformLocation(shader.Program, "pointLights[0].linear"), 0.09);
+		glUniform1f(glGetUniformLocation(shader.Program, "pointLights[0].quadratic"), 0.042);
 		// Point light 2
 		glUniform3f(glGetUniformLocation(shader.Program, "pointLights[1].position"), pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
 		glUniform3f(glGetUniformLocation(shader.Program, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
 		glUniform3f(glGetUniformLocation(shader.Program, "pointLights[1].diffuse"), 1.0f, 1.0f, 1.0f);
 		glUniform3f(glGetUniformLocation(shader.Program, "pointLights[1].specular"), 1.0f, 1.0f, 1.0f);
 		glUniform1f(glGetUniformLocation(shader.Program, "pointLights[1].constant"), 1.0f);
-		glUniform1f(glGetUniformLocation(shader.Program, "pointLights[1].linear"), 0.009);
-		glUniform1f(glGetUniformLocation(shader.Program, "pointLights[1].quadratic"), 0.0032);
+		glUniform1f(glGetUniformLocation(shader.Program, "pointLights[1].linear"), 0.09);
+		glUniform1f(glGetUniformLocation(shader.Program, "pointLights[1].quadratic"), 0.042);
 
 		// Draw the loaded model
 		glm::mat4 ModelMatrix;
 		ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));	// It's a bit too big for our scene, so scale it down
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
 		ourModel.Draw(shader);
 
