@@ -63,10 +63,7 @@ int main(void)
 
 
 	// Build and compile our shader program
-	Shader ourShader("Shaders/First.vs", "Shaders/First.fs");
-
-	// Build and compile our shader program
-	Shader lightingShader("Shaders/Lighting.vs", "Shaders/Lighting.fs");
+	Shader lightingShader("../Common/Shaders/LightingSum.vs", "../Common/Shaders/LightingSum.fs");
 	Shader lampShader("Shaders/Lamp.vs", "Shaders/Lamp.fs");
 
 
