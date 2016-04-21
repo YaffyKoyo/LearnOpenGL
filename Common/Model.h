@@ -45,6 +45,28 @@ public:
 		return meshes.size();
 	}
 
+	void drawVertex(glm::mat4 viewMatrix, glm::mat4 projectionMatrix, vector<glm::vec3> currentCubeVertexPos) {
+		glUseProgram(0);
+		glMatrixMode(GL_PROJECTION);
+		glLoadMatrixf((const GLfloat*)&projectionMatrix[0]);
+		glMatrixMode(GL_MODELVIEW);
+		glm::mat4 MV = viewMatrix * glm::mat4(1);
+		glLoadMatrixf((const GLfloat*)&MV[0]);
+
+		glColor3f(1, 1, 1);
+		glPointSize(5);
+		glBegin(GL_POINTS);
+		for (auto it = currentCubeVertexPos.begin(); it != currentCubeVertexPos.end(); ++it)
+		{
+			glVertex3f((*it)[0], (*it)[1], (*it)[2]);
+		}
+		glEnd();
+	}
+
+	vector<glm::vec3> getAllVertexPos() {
+		return verticesPos;
+	}
+
 	/*float* getVertex(int mesh, int index) {
 		assert((mesh >= 0) && (index >= 0));
 		if ((mesh<meshes.size())&&(index<meshes[mesh].getNumTriangles()*3))
@@ -65,7 +87,7 @@ private:
 	vector<Mesh> meshes;
 	string directory;
 	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-
+	vector<glm::vec3> verticesPos;
 										/*  Functions   */
 										// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 	void loadModel(string path)
@@ -122,6 +144,7 @@ private:
 			vector.y = mesh->mVertices[i].y;
 			vector.z = mesh->mVertices[i].z;
 			vertex.Position = vector;
+			verticesPos.push_back(vector);
 			// Normals
 			vector.x = mesh->mNormals[i].x;
 			vector.y = mesh->mNormals[i].y;
