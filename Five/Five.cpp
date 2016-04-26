@@ -7,9 +7,9 @@ const GLuint WIDTH = 1280, HEIGHT = 720;
 //void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 GLuint loadTexture(GLchar* path);
-void drawPoints(Model *object) {
-}
+
 
 
 // Camera class
@@ -17,6 +17,8 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 bool firstMouse = true;
 GLfloat lastX = WIDTH / 2.0f, lastY = HEIGHT / 2.0f;
 bool keys[1024];
+bool rightClicked = false;
+bool leftClicked = false;
 
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
@@ -54,8 +56,9 @@ int main(void)
 	//glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK)
@@ -108,7 +111,7 @@ int main(void)
 
 	// Point light positions
 	glm::vec3 pointLightPositions[] = {
-		glm::vec3(2.0f, 2.6f, 1.5f),
+		glm::vec3(0.7f, 0.0f, 0.0f),
 		glm::vec3(-1.7f, 0.9f, 1.0f)
 	};
 
@@ -133,12 +136,17 @@ int main(void)
 
 		//Do_Movement();
 		camera.Do_Movement();
+		/*if (leftClicked)
+		{
+			cout << lastX << ',' << lastY << endl;
+		}*/
+
 
 		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
 			blinn = !blinn;
 		}
 
-
+		//plane drawing
 		//Active shader
 		shader.Use();
 		// Transformation matrices
@@ -164,23 +172,48 @@ int main(void)
 
 		glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
-		glUniform3f(glGetUniformLocation(modelShader.Program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
+		glUniform3f(glGetUniformLocation(modelShader.Program, "pointLights[0].position"), lightPos.x, lightPos.y, lightPos.z);
 		glUniform3f(glGetUniformLocation(modelShader.Program, "pointLights[0].ambient"), 0.15f, 0.15f, 0.15f);
 		glUniform3f(glGetUniformLocation(modelShader.Program, "pointLights[0].diffuse"), 1.0f, 1.0f, 1.0f);
 		glUniform3f(glGetUniformLocation(modelShader.Program, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
 		glUniform1f(glGetUniformLocation(modelShader.Program, "pointLights[0].constant"), 1.0f);
 		glUniform1f(glGetUniformLocation(modelShader.Program, "pointLights[0].linear"), 0.02);
 		glUniform1f(glGetUniformLocation(modelShader.Program, "pointLights[0].quadratic"), 0.002);
-
-
 		glUniform3fv(glGetUniformLocation(modelShader.Program, "viewPos"), 1, &camera.Position[0]);
-		modelMatrix = glm::rotate(modelMatrix, angle += 0.5f*pi*deltaTime, glm::vec3(1, 1, 0));
-		glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+		
+		for (GLuint i = 0; i < 2; i++)
+		{
+			modelShader.Use();
+			modelMatrix = glm::mat4();
+			modelMatrix = glm::translate(modelMatrix, pointLightPositions[i]);
+			modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5));
 
-		cube.Draw(modelShader);
+			modelMatrix = glm::rotate(modelMatrix, angle += 0.25f*pi*deltaTime, glm::vec3(1, 1, 0));
+			glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+			cube.Draw(modelShader);
+
+			auto cubeVertexPos = cube.getAllVertexPos();
+			vector<glm::vec3> currentCubeVertexPos;
+			for (auto it = cubeVertexPos.begin(); it != cubeVertexPos.end(); it++)
+			{
+				glm::vec3 translatedVertex = glm::vec3(modelMatrix*glm::vec4((*it), 1));
+				currentCubeVertexPos.push_back(translatedVertex);
+			}
+			AABB *cubeAABB = new AABB(currentCubeVertexPos);
+
+			cubeAABB->DrawAABB(viewMatrix, projectionMatrix);
+			cube.drawVertex(viewMatrix, projectionMatrix, currentCubeVertexPos);
+
+		}
+		
+
+		//modelMatrix = glm::rotate(modelMatrix, angle += 0.5f*pi*deltaTime, glm::vec3(1, 1, 0));
+		//glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+		//cube.Draw(modelShader);
 
 		//visualize some premier elements
-		auto cubeVertexPos = cube.getAllVertexPos();
+		/*auto cubeVertexPos = cube.getAllVertexPos();
 		vector<glm::vec3> currentCubeVertexPos;
 		for (auto it = cubeVertexPos.begin(); it != cubeVertexPos.end(); it++)
 		{
@@ -190,7 +223,7 @@ int main(void)
 		AABB *cubeAABB = new AABB(currentCubeVertexPos);
 		
 		cubeAABB->DrawAABB(viewMatrix,projectionMatrix);
-		cube.drawVertex(viewMatrix, projectionMatrix, currentCubeVertexPos);
+		cube.drawVertex(viewMatrix, projectionMatrix, currentCubeVertexPos);*/
 
 		
 
@@ -248,8 +281,32 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 	lastX = xpos;
 	lastY = ypos;
+	if (rightClicked)
+	{
+		camera.ProcessMouseMovement(xoffset, yoffset);
+	}
+	
+}
 
-	camera.ProcessMouseMovement(xoffset, yoffset);
+void mouse_button_callback(GLFWwindow * window, int button, int action, int mods)
+{
+	if (button==GLFW_MOUSE_BUTTON_RIGHT&&action==GLFW_PRESS)
+	{
+		rightClicked = true;
+	}
+	else
+	{
+		rightClicked = false;
+	}
+
+	if (button == GLFW_MOUSE_BUTTON_LEFT&&action == GLFW_PRESS)
+	{
+		leftClicked = true;
+	}
+	else if(button == GLFW_MOUSE_BUTTON_LEFT&&action == GLFW_RELEASE)
+	{
+		leftClicked = false;
+	}
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
