@@ -106,8 +106,8 @@ int main(void)
 
 	Model cube("../Common/models/cube.obj");
 
-	cout << cube.getNumTrianglesOfMesh(0) << endl;
-	
+
+	RigidBody* rigidCube = new RigidBody(&cube);
 
 	// Point light positions
 	glm::vec3 pointLightPositions[] = {
@@ -180,40 +180,23 @@ int main(void)
 		glUniform1f(glGetUniformLocation(modelShader.Program, "pointLights[0].linear"), 0.02);
 		glUniform1f(glGetUniformLocation(modelShader.Program, "pointLights[0].quadratic"), 0.002);
 		glUniform3fv(glGetUniformLocation(modelShader.Program, "viewPos"), 1, &camera.Position[0]);
+
+
+		modelShader.Use();
+		modelMatrix = glm::mat4();
+		modelMatrix = glm::translate(modelMatrix, pointLightPositions[0]);
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5));
+		glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+		cube.Draw(modelShader);
+
+		rigidCube->StateUpdate();
 		
-		for (GLuint i = 0; i < 2; i++)
-		{
-			modelShader.Use();
-			modelMatrix = glm::mat4();
-			modelMatrix = glm::translate(modelMatrix, pointLightPositions[i]);
-			modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5));
-
-			modelMatrix = glm::rotate(modelMatrix, angle += 0.25f*pi*deltaTime, glm::vec3(1, 1, 0));
-			glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-			cube.Draw(modelShader);
-
-			auto cubeVertexPos = cube.getAllVertexPos();
-			vector<glm::vec3> currentCubeVertexPos;
-			for (auto it = cubeVertexPos.begin(); it != cubeVertexPos.end(); it++)
-			{
-				glm::vec3 translatedVertex = glm::vec3(modelMatrix*glm::vec4((*it), 1));
-				currentCubeVertexPos.push_back(translatedVertex);
-			}
-			AABB *cubeAABB = new AABB(currentCubeVertexPos);
-
-			cubeAABB->DrawAABB(viewMatrix, projectionMatrix);
-			cube.drawVertex(viewMatrix, projectionMatrix, currentCubeVertexPos);
-
-		}
 		
-
-		//modelMatrix = glm::rotate(modelMatrix, angle += 0.5f*pi*deltaTime, glm::vec3(1, 1, 0));
-		//glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
-		//cube.Draw(modelShader);
-
-		//visualize some premier elements
-		/*auto cubeVertexPos = cube.getAllVertexPos();
+		
+		
+		/*draw some premier elements*/
+		
+		auto cubeVertexPos = cube.getAllVertexPos();
 		vector<glm::vec3> currentCubeVertexPos;
 		for (auto it = cubeVertexPos.begin(); it != cubeVertexPos.end(); it++)
 		{
@@ -221,11 +204,11 @@ int main(void)
 			currentCubeVertexPos.push_back(translatedVertex);
 		}
 		AABB *cubeAABB = new AABB(currentCubeVertexPos);
-		
-		cubeAABB->DrawAABB(viewMatrix,projectionMatrix);
-		cube.drawVertex(viewMatrix, projectionMatrix, currentCubeVertexPos);*/
 
-		
+		cubeAABB->DrawAABB(viewMatrix, projectionMatrix);
+		cube.drawVertex(viewMatrix, projectionMatrix, currentCubeVertexPos);
+
+
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
@@ -264,7 +247,6 @@ GLuint loadTexture(GLchar* path)
 
 }
 
-
 /*mouse control preprocess*/
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -285,12 +267,12 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	{
 		camera.ProcessMouseMovement(xoffset, yoffset);
 	}
-	
+
 }
 
 void mouse_button_callback(GLFWwindow * window, int button, int action, int mods)
 {
-	if (button==GLFW_MOUSE_BUTTON_RIGHT&&action==GLFW_PRESS)
+	if (button == GLFW_MOUSE_BUTTON_RIGHT&&action == GLFW_PRESS)
 	{
 		rightClicked = true;
 	}
@@ -303,7 +285,7 @@ void mouse_button_callback(GLFWwindow * window, int button, int action, int mods
 	{
 		leftClicked = true;
 	}
-	else if(button == GLFW_MOUSE_BUTTON_LEFT&&action == GLFW_RELEASE)
+	else if (button == GLFW_MOUSE_BUTTON_LEFT&&action == GLFW_RELEASE)
 	{
 		leftClicked = false;
 	}

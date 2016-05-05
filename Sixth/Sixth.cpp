@@ -7,14 +7,12 @@ const GLuint WIDTH = 1280, HEIGHT = 720;
 const GLuint SHADOW_WIDTH = 1440, SHADOW_HEIGHT = 1440;
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void RenderQuad();
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 GLuint loadTexture(GLchar* path);
 
 void RenderScene(Shader & shader);
-
 void RenderCube();
-
+void RenderQuad();
 
 // Camera class
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -27,6 +25,8 @@ GLfloat lastFrame = 0.0f;
 
 GLfloat pi = 3.1416;
 GLuint planeVAO;
+GLboolean shadows = true;
+
 
 
 using namespace std;
@@ -71,23 +71,29 @@ int main(void)
 	// Setup some OpenGL options
 	glEnable(GL_DEPTH_TEST);
 
-
 	// Build and compile our shader program
+	Shader shader("../Common/Shaders/shadow_mapping.vs", "../Common/Shaders/shadow_mapping.fs");
 	Shader depthShader("../Common/Shaders/shadow_depth.vs", "../Common/Shaders/shadow_depth.fs");
 	Shader quadShader("../Common/Shaders/Quad.vs", "../Common/Shaders/Quad.fs");
 
+	shader.Use();
+	glUniform1i(glGetUniformLocation(shader.Program, "diffuseTexture"), 0);
+	glUniform1i(glGetUniformLocation(shader.Program, "shadowMap"), 1);
+
+
+
 	GLfloat planeVertices[] = {
 		// Positions          // Normals         // Texture Coords
-		25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  5.0f, 0.0f,
-		-25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
-		-25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,  0.0f, 5.0f,
+		25.0f, -0.5f, 25.0f, 0.0f, 1.0f, 0.0f, 25.0f, 0.0f,
+		-25.0f, -0.5f, -25.0f, 0.0f, 1.0f, 0.0f, 0.0f, 25.0f,
+		-25.0f, -0.5f, 25.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
 
-		25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  5.0f, 0.0f,
-		-25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,  0.0f, 5.0f,
-		25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,  5.0f, 5.0f
+		25.0f, -0.5f, 25.0f, 0.0f, 1.0f, 0.0f, 25.0f, 0.0f,
+		25.0f, -0.5f, -25.0f, 0.0f, 1.0f, 0.0f, 25.0f, 25.0f,
+		-25.0f, -0.5f, -25.0f, 0.0f, 1.0f, 0.0f, 0.0f, 25.0f
 	};
 	// Setup plane VAO
-	GLuint planeVAO, planeVBO;
+	GLuint planeVBO;
 	glGenVertexArrays(1, &planeVAO);
 	glGenBuffers(1, &planeVBO);
 	glBindVertexArray(planeVAO);
@@ -116,8 +122,10 @@ int main(void)
 		SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
@@ -170,6 +178,10 @@ int main(void)
 
 		camera.Do_Movement();
 
+		lightPos.x = sin(glfwGetTime()) * 3.0f;
+		lightPos.z = cos(glfwGetTime()) * 2.0f;
+		lightPos.y = 5.0 + cos(glfwGetTime()) * 1.0f;
+
 		glm::mat4 lightProjection, lightView;
 		glm::mat4 lightSpaceMatrix;
 		GLfloat near_plane = 1.0f, far_plane = 7.5f;
@@ -190,13 +202,30 @@ int main(void)
 		glViewport(0, 0, WIDTH, HEIGHT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		//Render Scene as normal
+		shader.Use();
+		glm::mat4 projectionMatrix = glm::perspective(camera.Zoom, (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+		glm::mat4 viewMatrix = camera.GetViewMatrix();
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+		//set light uniforms
+		glUniform3fv(glGetUniformLocation(shader.Program, "lightPos"), 1, &lightPos[0]);
+		glUniform3fv(glGetUniformLocation(shader.Program, "viewPos"), 1, &camera.Position[0]);
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "lightSpaceMatrix"), 1, GL_FALSE,glm::value_ptr(lightSpaceMatrix));
+		
+		glUniform1i(glGetUniformLocation(shader.Program, "shadows"), shadows);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, floorTexture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
+		RenderScene(shader);
 		// Render Depth map to quad
 		quadShader.Use();
 		glUniform1f(glGetUniformLocation(quadShader.Program, "near_plane"), near_plane);
 		glUniform1f(glGetUniformLocation(quadShader.Program, "far_plane"), far_plane);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, depthMap);
-		RenderQuad();
+		//RenderQuad();
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);

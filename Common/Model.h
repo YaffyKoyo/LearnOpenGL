@@ -66,6 +66,7 @@ public:
 	vector<glm::vec3> getAllVertexPos() {
 		return verticesPos;
 	}
+	vector<glm::vec3> verticesPos;
 
 	/*float* getVertex(int mesh, int index) {
 		assert((mesh >= 0) && (index >= 0));
@@ -87,7 +88,7 @@ private:
 	vector<Mesh> meshes;
 	string directory;
 	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-	vector<glm::vec3> verticesPos;
+
 										/*  Functions   */
 										// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 	void loadModel(string path)
