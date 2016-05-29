@@ -19,10 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{A762D6C7-153C-4E13-B6B9-6B8D9C0C4954}</ProjectGuid>
+    <ProjectGuid>{348E7031-28BF-4A52-B420-2763C46C1C18}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Seven</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>Skinny</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -86,13 +87,15 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Common\soil\src;$(SolutionDir)\Common\glew-1.13.0\include;$(ProjectDir);$(SolutionDir)\Common\glfw-3.1.2.bin.WIN32\include;$(SolutionDir)\Common\glm;$(SolutionDir)\Common;$(SolutionDir)\Common\Shaders;$(SolutionDir)\Common\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Common\soil\lib;$(SolutionDir)\Common\glew-1.13.0\lib\Release\Win32;$(SolutionDir)\Common\glfw-3.1.2.bin.WIN32\lib-vc2015;$(SolutionDir)\Common\glew-1.13.0\bin\Release\Win32;$(ProjectDir);$(SolutionDir)\Common\assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;opengl32.lib;glfw3.lib;SOIL.lib;assimp-vc130-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -146,6 +149,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Mesh_A.h" />
+    <ClInclude Include="Model_A.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>

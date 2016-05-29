@@ -64,7 +64,7 @@ int main(void)
 
 	// Build and compile our shader program
 	Shader lightingShader("../Common/Shaders/LightingSum.vs", "../Common/Shaders/LightingSum.fs");
-	Shader lampShader("Shaders/Lamp.vs", "Shaders/Lamp.fs");
+	Shader lampShader("../Common/Shaders/Lamp.vs", "../Common/Shaders/Lamp.fs");
 
 
 	GLfloat vertices[] = {

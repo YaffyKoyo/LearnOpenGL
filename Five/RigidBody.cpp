@@ -33,10 +33,13 @@ void RigidBody::MotionUpdate(float deltaTime)
 
 void RigidBody::StateUpdate()
 {
-	auto cubeVertices = object->getAllVertexPos();
-	for (auto it = cubeVertices.begin(); it != cubeVertices.end(); ++it) {
-		//*it *= omega;
-		*it += position;
+	auto cubeMeshes = object->getMeshes();
+	for (auto it = (*cubeMeshes).begin(); it != (*cubeMeshes).end(); ++it) {
+		auto meshVetex = &it->vertices;
+		for (auto itV = (*meshVetex).begin();itV!=(*meshVetex).end();++itV)
+		{
+			itV->Position += glm::vec3(10, 0, 0);
+		}
 	}		
 }
 

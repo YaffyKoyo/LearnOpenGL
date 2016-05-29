@@ -183,13 +183,16 @@ int main(void)
 
 
 		modelShader.Use();
-		modelMatrix = glm::mat4();
-		modelMatrix = glm::translate(modelMatrix, pointLightPositions[0]);
+		modelMatrix = glm::mat4(1.0);
+		//modelMatrix = glm::translate(modelMatrix, pointLightPositions[0]);
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5));
+		//modelMatrix = glm::rotate(modelMatrix, angle+=1.57*deltaTime, glm::vec3(0, 0, 1));
 		glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-		cube.Draw(modelShader);
 
 		rigidCube->StateUpdate();
+		rigidCube->object->Draw(modelShader);
+		//cube.Draw(modelShader);
+
 		
 		
 		
@@ -198,7 +201,7 @@ int main(void)
 		
 		auto cubeVertexPos = cube.getAllVertexPos();
 		vector<glm::vec3> currentCubeVertexPos;
-		for (auto it = cubeVertexPos.begin(); it != cubeVertexPos.end(); it++)
+		for (auto it = cubeVertexPos->begin(); it != cubeVertexPos->end(); it++)
 		{
 			glm::vec3 translatedVertex = glm::vec3(modelMatrix*glm::vec4((*it), 1));
 			currentCubeVertexPos.push_back(translatedVertex);

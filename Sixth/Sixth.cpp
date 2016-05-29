@@ -8,7 +8,6 @@ const GLuint SHADOW_WIDTH = 1440, SHADOW_HEIGHT = 1440;
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-GLuint loadTexture(GLchar* path);
 
 void RenderScene(Shader & shader);
 void RenderCube();

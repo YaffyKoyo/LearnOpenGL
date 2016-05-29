@@ -63,9 +63,14 @@ public:
 		glEnd();
 	}
 
-	vector<glm::vec3> getAllVertexPos() {
-		return verticesPos;
+	vector<glm::vec3>* getAllVertexPos() {
+		return &verticesPos;
 	}
+	vector<Mesh>* getMeshes() {
+		return &meshes;
+	}
+
+
 	vector<glm::vec3> verticesPos;
 
 	/*float* getVertex(int mesh, int index) {
@@ -81,6 +86,7 @@ public:
 			return 0;
 		}
 	}*/
+
 
 
 private:

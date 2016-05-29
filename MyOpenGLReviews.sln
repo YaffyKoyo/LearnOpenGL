@@ -5,15 +5,19 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "First", "First\First.vcxproj", "{B3149FB3-7423-4E5F-A24B-8261C8168ED2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Second", "Second\Second.vcxproj", "{6FB15098-56BD-46E7-A3BD-3F84E76E8FC2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lights", "Second\Second.vcxproj", "{6FB15098-56BD-46E7-A3BD-3F84E76E8FC2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Third", "Third\Third.vcxproj", "{7C45E116-652E-4FF2-AADB-B5466A66FE1E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Model", "Third\Third.vcxproj", "{7C45E116-652E-4FF2-AADB-B5466A66FE1E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fourth", "Fourth\Fourth.vcxproj", "{5B4ED64A-D3DB-45EA-A2C6-7731EE53A51E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Piano", "Fourth\Fourth.vcxproj", "{5B4ED64A-D3DB-45EA-A2C6-7731EE53A51E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Five", "Five\Five.vcxproj", "{002A5ADD-BC20-404E-AA3E-196C441C3FD6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Physics", "Five\Five.vcxproj", "{002A5ADD-BC20-404E-AA3E-196C441C3FD6}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sixth", "Sixth\Sixth.vcxproj", "{5F6C05BB-2805-4579-97AF-CC1EA3C4FDBC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shadow", "Sixth\Sixth.vcxproj", "{5F6C05BB-2805-4579-97AF-CC1EA3C4FDBC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Skinny", "Seven\Seven.vcxproj", "{348E7031-28BF-4A52-B420-2763C46C1C18}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalMap", "NormalMap\NormalMap.vcxproj", "{791BFE4B-BA17-435A-B747-6FBBCF6B562C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +75,22 @@ Global
 		{5F6C05BB-2805-4579-97AF-CC1EA3C4FDBC}.Release|x64.Build.0 = Release|x64
 		{5F6C05BB-2805-4579-97AF-CC1EA3C4FDBC}.Release|x86.ActiveCfg = Release|Win32
 		{5F6C05BB-2805-4579-97AF-CC1EA3C4FDBC}.Release|x86.Build.0 = Release|Win32
+		{348E7031-28BF-4A52-B420-2763C46C1C18}.Debug|x64.ActiveCfg = Debug|x64
+		{348E7031-28BF-4A52-B420-2763C46C1C18}.Debug|x64.Build.0 = Debug|x64
+		{348E7031-28BF-4A52-B420-2763C46C1C18}.Debug|x86.ActiveCfg = Debug|Win32
+		{348E7031-28BF-4A52-B420-2763C46C1C18}.Debug|x86.Build.0 = Debug|Win32
+		{348E7031-28BF-4A52-B420-2763C46C1C18}.Release|x64.ActiveCfg = Release|x64
+		{348E7031-28BF-4A52-B420-2763C46C1C18}.Release|x64.Build.0 = Release|x64
+		{348E7031-28BF-4A52-B420-2763C46C1C18}.Release|x86.ActiveCfg = Release|Win32
+		{348E7031-28BF-4A52-B420-2763C46C1C18}.Release|x86.Build.0 = Release|Win32
+		{791BFE4B-BA17-435A-B747-6FBBCF6B562C}.Debug|x64.ActiveCfg = Debug|x64
+		{791BFE4B-BA17-435A-B747-6FBBCF6B562C}.Debug|x64.Build.0 = Debug|x64
+		{791BFE4B-BA17-435A-B747-6FBBCF6B562C}.Debug|x86.ActiveCfg = Debug|Win32
+		{791BFE4B-BA17-435A-B747-6FBBCF6B562C}.Debug|x86.Build.0 = Debug|Win32
+		{791BFE4B-BA17-435A-B747-6FBBCF6B562C}.Release|x64.ActiveCfg = Release|x64
+		{791BFE4B-BA17-435A-B747-6FBBCF6B562C}.Release|x64.Build.0 = Release|x64
+		{791BFE4B-BA17-435A-B747-6FBBCF6B562C}.Release|x86.ActiveCfg = Release|Win32
+		{791BFE4B-BA17-435A-B747-6FBBCF6B562C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

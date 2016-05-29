@@ -1,117 +1,243 @@
-// Seven.cpp : Defines the entry point for the console application.
+// First.cpp : Defines the entry point for the console application.
 //
 
 #include "stdafx.h"
+GLFWwindow* window;
+const GLuint WIDTH = 1280, HEIGHT = 720;
+//void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+GLuint loadTexture(GLchar* path);
 
 
-#include <math.h>   // smallpt, a Path Tracer by Kevin Beason, 2008 
-#include <stdlib.h> // Make : g++ -O3 -fopenmp smallpt.cpp -o smallpt 
-#include <stdio.h>  //        Remove "-fopenmp" for g++ version < 4.2 
-#include <random>
-#include <iostream>
+// Camera class
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+bool firstMouse = true;
+GLfloat lastX = WIDTH / 2.0f, lastY = HEIGHT / 2.0f;
+bool keys[1024];
 
-std::default_random_engine generator;
-std::uniform_real_distribution<double> distr(0.0, 1.0);
-double erand48(unsigned short *X) {
-	return distr(generator);
-}
-double M_PI = 3.1415;
+// Deltatime
+GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
+GLfloat lastFrame = 0.0f;  	// Time of last frame
+GLboolean blinn = false;
 
-struct Vec {        // Usage: time ./smallpt 5000 && xv image.ppm 
-	double x, y, z;                  // position, also color (r,g,b) 
-	Vec(double x_ = 0, double y_ = 0, double z_ = 0) { x = x_; y = y_; z = z_; }
-	Vec operator+(const Vec &b) const { return Vec(x + b.x, y + b.y, z + b.z); }
-	Vec operator-(const Vec &b) const { return Vec(x - b.x, y - b.y, z - b.z); }
-	Vec operator*(double b) const { return Vec(x*b, y*b, z*b); }
-	Vec mult(const Vec &b) const { return Vec(x*b.x, y*b.y, z*b.z); }
-	Vec& norm() { return *this = *this * (1 / sqrt(x*x + y*y + z*z)); }
-	double dot(const Vec &b) const { return x*b.x + y*b.y + z*b.z; } // cross: 
-	Vec operator%(Vec&b) { return Vec(y*b.z - z*b.y, z*b.x - x*b.z, x*b.y - y*b.x); }
-};
-struct Ray { Vec o, d; Ray(Vec o_, Vec d_) : o(o_), d(d_) {} };
-enum Refl_t { DIFF, SPEC, REFR };  // material types, used in radiance() 
-struct Sphere {
-	double rad;       // radius 
-	Vec p, e, c;      // position, emission, color 
-	Refl_t refl;      // reflection type (DIFFuse, SPECular, REFRactive) 
-	Sphere(double rad_, Vec p_, Vec e_, Vec c_, Refl_t refl_) :
-		rad(rad_), p(p_), e(e_), c(c_), refl(refl_) {}
-	double intersect(const Ray &r) const { // returns distance, 0 if nohit 
-		Vec op = p - r.o; // Solve t^2*d.d + 2*t*(o-p).d + (o-p).(o-p)-R^2 = 0 
-		double t, eps = 1e-4, b = op.dot(r.d), det = b*b - op.dot(op) + rad*rad;
-		if (det < 0) return 0; else det = sqrt(det);
-		return (t = b - det) > eps ? t : ((t = b + det) > eps ? t : 0);
+GLfloat pi = 3.1416;
+
+using namespace std;
+
+int main(void)
+{
+	/* Initialize the library */
+	if (!glfwInit())
+		return -1;
+
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	//glfwWindowHint(GLFW_SAMPLES, 4);
+
+	/* Create a windowed mode window and its OpenGL context */
+	window = glfwCreateWindow(WIDTH, HEIGHT, "Third", NULL, NULL);
+	if (!window)
+	{
+		glfwTerminate();
+		return -1;
 	}
-};
-Sphere spheres[] = {//Scene: radius, position, emission, color, material 
-	Sphere(1e5, Vec(1e5 + 1,40.8,81.6), Vec(),Vec(.75,.25,.25),DIFF),//Left 
-	Sphere(1e5, Vec(-1e5 + 99,40.8,81.6),Vec(),Vec(.25,.25,.75),DIFF),//Rght 
-	Sphere(1e5, Vec(50,40.8, 1e5),     Vec(),Vec(.75,.75,.75),DIFF),//Back 
-	Sphere(1e5, Vec(50,40.8,-1e5 + 170), Vec(),Vec(),           DIFF),//Frnt 
-	Sphere(1e5, Vec(50, 1e5, 81.6),    Vec(),Vec(.75,.75,.75),DIFF),//Botm 
-	Sphere(1e5, Vec(50,-1e5 + 81.6,81.6),Vec(),Vec(.75,.75,.75),DIFF),//Top 
-	Sphere(16.5,Vec(27,16.5,47),       Vec(),Vec(1,1,1)*.999, SPEC),//Mirr 
-	Sphere(16.5,Vec(73,16.5,78),       Vec(),Vec(1,1,1)*.999, REFR),//Glas 
-	Sphere(600, Vec(50,681.6 - .27,81.6),Vec(12,12,12),  Vec(), DIFF) //Lite 
-};
-inline double clamp(double x) { return x < 0 ? 0 : x>1 ? 1 : x; }
-inline int toInt(double x) { return int(pow(clamp(x), 1 / 2.2) * 255 + .5); }
-inline bool intersect(const Ray &r, double &t, int &id) {
-	double n = sizeof(spheres) / sizeof(Sphere), d, inf = t = 1e20;
-	for (int i = int(n); i--;) if ((d = spheres[i].intersect(r)) && d < t) { t = d; id = i; }
-	return t < inf;
-}
-Vec radiance(const Ray &r, int depth, unsigned short *Xi) {
-	double t;                               // distance to intersection 
-	int id = 0;                               // id of intersected object 
-	if (!intersect(r, t, id)) return Vec(); // if miss, return black 
-	const Sphere &obj = spheres[id];        // the hit object 
-	Vec x = r.o + r.d*t, n = (x - obj.p).norm(), nl = n.dot(r.d) < 0 ? n : n*-1, f = obj.c;
-	double p = f.x > f.y && f.x > f.z ? f.x : f.y > f.z ? f.y : f.z; // max refl 
-	if (++depth > 5) if (erand48(Xi) < p) f = f*(1 / p); else return obj.e; //R.R. 
-	if (obj.refl == DIFF) {                  // Ideal DIFFUSE reflection 
-		double r1 = 2 * M_PI*erand48(Xi), r2 = erand48(Xi), r2s = sqrt(r2);
-		Vec w = nl, u = ((fabs(w.x) > .1 ? Vec(0, 1) : Vec(1)) % w).norm(), v = w%u;
-		Vec d = (u*cos(r1)*r2s + v*sin(r1)*r2s + w*sqrt(1 - r2)).norm();
-		return obj.e + f.mult(radiance(Ray(x, d), depth, Xi));
+	/* Make the window's context current */
+	glfwMakeContextCurrent(window);
+
+	//Set the required callback function
+	//glfwSetKeyCallback(window, key_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	glewExperimental = GL_TRUE;
+	if (glewInit() != GLEW_OK)
+	{
+		std::cout << "Failed to initialize GLEW" << std::endl;
+		return -1;
 	}
-	else if (obj.refl == SPEC)            // Ideal SPECULAR reflection 
-		return obj.e + f.mult(radiance(Ray(x, r.d - n * 2 * n.dot(r.d)), depth, Xi));
-	Ray reflRay(x, r.d - n * 2 * n.dot(r.d));     // Ideal dielectric REFRACTION 
-	bool into = n.dot(nl) > 0;                // Ray from outside going in? 
-	double nc = 1, nt = 1.5, nnt = into ? nc / nt : nt / nc, ddn = r.d.dot(nl), cos2t;
-	if ((cos2t = 1 - nnt*nnt*(1 - ddn*ddn)) < 0)    // Total internal reflection 
-		return obj.e + f.mult(radiance(reflRay, depth, Xi));
-	Vec tdir = (r.d*nnt - n*((into ? 1 : -1)*(ddn*nnt + sqrt(cos2t)))).norm();
-	double a = nt - nc, b = nt + nc, R0 = a*a / (b*b), c = 1 - (into ? -ddn : tdir.dot(n));
-	double Re = R0 + (1 - R0)*c*c*c*c*c, Tr = 1 - Re, P = .25 + .5*Re, RP = Re / P, TP = Tr / (1 - P);
-	return obj.e + f.mult(depth > 2 ? (erand48(Xi) < P ?   // Russian roulette 
-		radiance(reflRay, depth, Xi)*RP : radiance(Ray(x, tdir), depth, Xi)*TP) :
-		radiance(reflRay, depth, Xi)*Re + radiance(Ray(x, tdir), depth, Xi)*Tr);
+
+	glViewport(0, 0, WIDTH, HEIGHT);
+	// Setup some OpenGL options
+	glEnable(GL_DEPTH_TEST);
+
+
+	// Build and compile our shader program
+	Shader shader("../Common/Shaders/Blinn-Phong.vs", "../Common/Shaders/Blinn-Phong.fs");
+	Shader modelShader("Animation.vs", "Animation.fs");
+
+	GLfloat planeVertices[] = {
+		// Positions          // Normals         // Texture Coords
+		8.0f, -0.5f,  8.0f,  0.0f, 1.0f, 0.0f,  5.0f, 0.0f,
+		-8.0f, -0.5f,  8.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+		-8.0f, -0.5f, -8.0f,  0.0f, 1.0f, 0.0f,  0.0f, 5.0f,
+
+		8.0f, -0.5f,  8.0f,  0.0f, 1.0f, 0.0f,  5.0f, 0.0f,
+		-8.0f, -0.5f, -8.0f,  0.0f, 1.0f, 0.0f,  0.0f, 5.0f,
+		8.0f, -0.5f, -8.0f,  0.0f, 1.0f, 0.0f,  5.0f, 5.0f
+	};
+	// Setup plane VAO
+	GLuint planeVAO, planeVBO;
+	glGenVertexArrays(1, &planeVAO);
+	glGenBuffers(1, &planeVBO);
+	glBindVertexArray(planeVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+	glBindVertexArray(0);
+
+
+	GLuint floorTexture = loadTexture("../Common/images/chessboard_pattern.png");
+
+	Model cube("../Common/models/ArmyPilot/ArmyPilot.ms3d");
+
+	
+	// Point light positions
+	glm::vec3 pointLightPositions[] = {
+		glm::vec3(2.0f, 2.6f, 1.5f),
+		glm::vec3(-1.7f, 0.9f, 1.0f)
+	};
+
+	// Light source
+	glm::vec3 lightPos(0.5f, 0.5f, 0.5f);
+
+	glm::vec3 position(0, 0, 0);
+	float angle = 0;
+
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	/* Loop until the user closes the window */
+
+	do {
+		// Calculate deltatime of current frame
+		GLfloat currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		//Do_Movement();
+		camera.Do_Movement();
+
+		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
+			blinn = !blinn;
+		}
+
+
+		//Active shader
+		shader.Use();
+		// Transformation matrices
+		glm::mat4 projectionMatrix = glm::perspective(camera.Zoom, (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+		glm::mat4 viewMatrix = camera.GetViewMatrix();
+		glm::mat4 modelMatrix = glm::mat4();
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+
+		glUniform3fv(glGetUniformLocation(shader.Program, "lightPos"), 1, &lightPos[0]);
+		glUniform3fv(glGetUniformLocation(shader.Program, "viewPos"), 1, &camera.Position[0]);
+		glUniform1i(glGetUniformLocation(shader.Program, "blinn"), blinn);
+
+		glBindVertexArray(planeVAO);
+		glBindTexture(GL_TEXTURE_2D, floorTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+
+		/*cube*/
+		modelShader.Use();
+
+		glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+		glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+		glUniform3f(glGetUniformLocation(modelShader.Program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
+		glUniform3f(glGetUniformLocation(modelShader.Program, "pointLights[0].ambient"), 0.15f, 0.15f, 0.15f);
+		glUniform3f(glGetUniformLocation(modelShader.Program, "pointLights[0].diffuse"), 1.0f, 1.0f, 1.0f);
+		glUniform3f(glGetUniformLocation(modelShader.Program, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
+		glUniform1f(glGetUniformLocation(modelShader.Program, "pointLights[0].constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(modelShader.Program, "pointLights[0].linear"), 0.02);
+		glUniform1f(glGetUniformLocation(modelShader.Program, "pointLights[0].quadratic"), 0.002);
+
+
+		glUniform3fv(glGetUniformLocation(modelShader.Program, "viewPos"), 1, &camera.Position[0]);
+		modelMatrix = glm::scale(glm::translate(modelMatrix, glm::vec3(0, 0, 0)), glm::vec3(0.01));
+		//modelMatrix = glm::mat4();
+		//modelMatrix = glm::scale(glm::rotate(modelMatrix,0.0f, glm::vec3(1, 0, 0)), glm::vec3(0.5));
+
+		glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+
+		cube.Draw(modelShader);
+
+		/* Swap front and back buffers */
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	} while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
+		glfwWindowShouldClose(window) == 0);
+
+	//glDeleteVertexArrays(1, &containerVAO);
+	//glDeleteBuffers(1, &VBO);
+	//glDeleteBuffers(1, &EBO);
+
+	glfwTerminate();
+	return 0;
 }
-int main(int argc, char *argv[]) {
-	int w = 1024, h = 768, samps = argc == 2 ? atoi(argv[1]) / 4 : 1; // # samples 
-	Ray cam(Vec(50, 52, 295.6), Vec(0, -0.042612, -1).norm()); // cam pos, dir 
-	Vec cx = Vec(w*.5135 / h), cy = (cx%cam.d).norm()*.5135, r, *c = new Vec[w*h];
-#pragma omp parallel for schedule(dynamic, 1) private(r)       // OpenMP 
-	for (int y = 0; y < h; y++) {                       // Loop over image rows 
-		fprintf(stderr, "\rRendering (%d spp) %5.2f%%", samps * 4, 100.*y / (h - 1));
-		for (unsigned short x = 0, Xi[3] = { 0,0,y*y*y }; x < w; x++)   // Loop cols 
-			for (int sy = 0, i = (h - y - 1)*w + x; sy < 2; sy++)     // 2x2 subpixel rows 
-				for (int sx = 0; sx < 2; sx++, r = Vec()) {        // 2x2 subpixel cols 
-					for (int s = 0; s < samps; s++) {
-						double r1 = 2 * erand48(Xi), dx = r1 < 1 ? sqrt(r1) - 1 : 1 - sqrt(2 - r1);
-						double r2 = 2 * erand48(Xi), dy = r2 < 1 ? sqrt(r2) - 1 : 1 - sqrt(2 - r2);
-						Vec d = cx*(((sx + .5 + dx) / 2 + x) / w - .5) +
-							cy*(((sy + .5 + dy) / 2 + y) / h - .5) + cam.d;
-						r = r + radiance(Ray(cam.o + d * 140, d.norm()), 0, Xi)*(1. / samps);
-					} // Camera rays are pushed ^^^^^ forward to start in interior 
-					c[i] = c[i] + Vec(clamp(r.x), clamp(r.y), clamp(r.z))*.25;
-				}
+
+GLuint loadTexture(GLchar* path)
+{
+	// Generate texture ID and load texture data 
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	int width, height;
+	unsigned char* image = SOIL_load_image(path, &width, &height, 0, SOIL_LOAD_RGB);
+	// Assign texture to ID
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	// Parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	SOIL_free_image_data(image);
+	return textureID;
+
+}
+
+
+/*mouse control preprocess*/
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
 	}
-	FILE *f = fopen("image.ppm", "w");         // Write image to PPM file. 
-	fprintf(f, "P3\n%d %d\n%d\n", w, h, 255);
-	for (int i = 0; i < w*h; i++)
-		fprintf(f, "%d %d %d ", toInt(c[i].x), toInt(c[i].y), toInt(c[i].z));
+
+	GLfloat xoffset = xpos - lastX;
+	GLfloat yoffset = lastY - ypos;  // Reversed since y-coordinates go from bottom to left
+
+	lastX = xpos;
+	lastY = ypos;
+
+	camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	camera.ProcessMouseScroll(yoffset);
 }
 
