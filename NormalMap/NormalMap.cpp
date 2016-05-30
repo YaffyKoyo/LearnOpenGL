@@ -12,6 +12,8 @@ void computeTangentBasis(std::vector<GLfloat>& vertices_vector,
 	std::vector<glm::vec3>& bitangents);
 GLuint loadTexture(GLchar* path);
 
+GLuint loadCubemap(std::vector<const GLchar*> faces);
+
 bool firstMouse = true;
 const GLuint WIDTH = 1280, HEIGHT = 720;
 
@@ -65,19 +67,66 @@ int main(void)
 	glViewport(0, 0, WIDTH, HEIGHT);
 	// Setup some OpenGL options
 	glEnable(GL_DEPTH_TEST);
-
+	glDepthFunc(GL_LESS);
 
 	// Build and compile our shader program
 	Shader lampShader("../Common/Shaders/Lamp.vs", "../Common/Shaders/Lamp.fs");
 	Shader normalShader("../Common/Shaders/normal_mapping.vs", "../Common/Shaders/normal_mapping.fs");
+	Shader skyboxShader("../Common/Shaders/skybox.vs", "../Common/Shaders/skybox.fs");
 
-	GLuint diffuseMap = loadTexture("../Common/images/brickwall.jpg");
+
+
+	GLuint diffuseMap = loadTexture("../Common/images/chessboard_pattern.png");
 	GLuint normalMap = loadTexture("../Common/images/Carbon Fiber_normal.png");
 
 	normalShader.Use();
 	glUniform1i(glGetUniformLocation(normalShader.Program, "diffuseMap"), 0);
 	glUniform1i(glGetUniformLocation(normalShader.Program, "normalMap"), 1);
 
+	GLfloat skyboxVertices[] = {
+		// Positions          
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		-1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f
+	};
 
 	GLfloat vertices[] = {
 		// Positions          // Normals           // Texture Coords
@@ -200,14 +249,28 @@ int main(void)
 
 	glBindVertexArray(0);
 
+	// Setup skybox VAO
+	GLuint skyboxVAO, skyboxVBO;
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glBindVertexArray(0);
 
 
+	// Cubemap (Skybox)
+	std::vector<const GLchar*> faces;	  
+	faces.push_back("../Common/images/skybox/right.jpg");
+	faces.push_back("../Common/images/skybox/left.jpg");
+	faces.push_back("../Common/images/skybox/top.jpg");
+	faces.push_back("../Common/images/skybox/bottom.jpg");
+	faces.push_back("../Common/images/skybox/back.jpg");
+	faces.push_back("../Common/images/skybox/front.jpg");
+	GLuint cubemapTexture = loadCubemap(faces);
 
-	int size = sizeof(vertices);
-	int size2 = sizeof(testVector);
-	int size3 = testVector.size();
-	int size4 = sizeof(GLfloat);
-	std::cout << size << " " << size2 << " " << size3 <<" "<<size4<< std::endl;
 
 
 	GLuint lightVAO;
@@ -230,40 +293,7 @@ int main(void)
 		rotationRate.push_back((float)std::rand() / (RAND_MAX)*6.28-3.14);
 	}
 
-	/*light version texture loading*/
-	//// Load textures
-	//GLuint diffuseMap, specularMap, emissionMap;
-	//glGenTextures(1, &diffuseMap);
-	//glGenTextures(1, &specularMap);
-	//glGenTextures(1, &emissionMap);
-	//int width, height;
-	//unsigned char* image;
-	//// Diffuse map
-	//image = SOIL_load_image("../Common/images/brickwall_normal.jpg", &width, &height, 0, SOIL_LOAD_RGB);
-	//glBindTexture(GL_TEXTURE_2D, diffuseMap);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	//glGenerateMipmap(GL_TEXTURE_2D);
-	//SOIL_free_image_data(image);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-	//// Specular map
-	//image = SOIL_load_image("../Common/images/container2_specular.png", &width, &height, 0, SOIL_LOAD_RGB);
-	//glBindTexture(GL_TEXTURE_2D, specularMap);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	//glGenerateMipmap(GL_TEXTURE_2D);
-	//SOIL_free_image_data(image);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-	//glBindTexture(GL_TEXTURE_2D, 0);
 
-	////Set texture Units;
-	//lightingShader.Use();
-	//glUniform1i(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0);
-	//glUniform1i(glGetUniformLocation(lightingShader.Program, "material.specular"), 1);
 
 	/* Loop until the user closes the window */
 
@@ -280,71 +310,25 @@ int main(void)
 		camera.Do_Movement();
 
 
-		////Active shader
-		//lightingShader.Use();
-		//GLint lightPosLoc = glGetUniformLocation(lightingShader.Program, "light.position");
-		//GLint viewPosLoc = glGetUniformLocation(lightingShader.Program, "viewPos");
-		//glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-		//glUniform3f(viewPosLoc, camera.Position.x, camera.Position.y, camera.Position.z);
+		// Draw skybox first
+		glDepthMask(GL_FALSE);// Remember to turn depth writing off
+		skyboxShader.Use();
+		glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));	// Remove any translation component of the view matrix
+		glm::mat4 projection = glm::perspective(camera.Zoom, (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+		glUniformMatrix4fv(glGetUniformLocation(skyboxShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(skyboxShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		// skybox cube
+		glBindVertexArray(skyboxVAO);
+		glActiveTexture(GL_TEXTURE0);
+		glUniform1i(glGetUniformLocation(skyboxShader.Program, "skybox"), 0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glDepthMask(GL_TRUE);
 
 
-		//// Set material properties
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 32.0f);
-
-		///*differnt kinds of lights*/
-
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.05f, 0.05f, 0.05f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
-		//// Point light 1
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), 0.05f, 0.05f, 0.05f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), 0.8f, 0.8f, 0.8f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].constant"), 1.0f);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.09);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.032);
-		//// Point light 2
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].position"), pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].diffuse"), 0.8f, 0.8f, 0.8f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].specular"), 1.0f, 1.0f, 1.0f);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].constant"), 1.0f);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].linear"), 0.09);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].quadratic"), 0.032);
-		//// Point light 3
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].position"), pointLightPositions[2].x, pointLightPositions[2].y, pointLightPositions[2].z);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].ambient"), 0.05f, 0.05f, 0.05f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].diffuse"), 0.8f, 0.8f, 0.8f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].specular"), 1.0f, 1.0f, 1.0f);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[2].constant"), 1.0f);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[2].linear"), 0.09);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[2].quadratic"), 0.032);
-		//// Point light 4
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[3].position"), pointLightPositions[3].x, pointLightPositions[3].y, pointLightPositions[3].z);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[3].ambient"), 0.05f, 0.05f, 0.05f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[3].diffuse"), 0.8f, 0.8f, 0.8f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[3].specular"), 1.0f, 1.0f, 1.0f);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[3].constant"), 1.0f);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[3].linear"), 0.09);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[3].quadratic"), 0.032);
-
-		////flash light
-		//// SpotLight
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.position"), camera.Position.x, camera.Position.y, camera.Position.z);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.direction"), camera.Front.x, camera.Front.y, camera.Front.z);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.ambient"), 0.0f, 0.0f, 0.0f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.diffuse"), 1.0f, 1.0f, 1.0f);
-		//glUniform3f(glGetUniformLocation(lightingShader.Program, "spotLight.specular"), 1.0f, 1.0f, 1.0f);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.constant"), 1.0f);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.linear"), 0.09);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.quadratic"), 0.032);
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.cutOff"), glm::cos(glm::radians(12.5f)));
-		//glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.outerCutOff"), glm::cos(glm::radians(15.0f)));
 
 
-		/*end of different kinds of lights*/
 
 
 		normalShader.Use();
@@ -362,7 +346,7 @@ int main(void)
 		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 		glUniformMatrix4fv(projlLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-		glUniform3fv(glGetUniformLocation(normalShader.Program, "lightPos"), 1, &lightPos[0]);
+		glUniform3fv(glGetUniformLocation(normalShader.Program, "lightPos"), 1, glm::value_ptr(pointLightPositions[3]));
 		glUniform3fv(glGetUniformLocation(normalShader.Program, "viewPos"), 1, &camera.Position[0]);
 		
 
@@ -402,7 +386,7 @@ int main(void)
 
 		glBindVertexArray(lightVAO);
 
-		for (GLuint i = 0; i < 4; i++)
+		for (GLuint i = 3; i < 4; i++)
 		{
 			modelMatrix = glm::mat4();
 			modelMatrix = glm::translate(modelMatrix, pointLightPositions[i]);
@@ -451,7 +435,30 @@ GLuint loadTexture(GLchar* path)
 	return textureID;
 }
 
+GLuint loadCubemap(std::vector<const GLchar*> faces)
+{
+	GLuint textureID;
+	glGenTextures(1, &textureID);
 
+	int width, height;
+	unsigned char* image;
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+	for (GLuint i = 0; i < faces.size(); i++)
+	{
+		image = SOIL_load_image(faces[i], &width, &height, 0, SOIL_LOAD_RGB);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		SOIL_free_image_data(image);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	return textureID;
+}
 
 /*mouse control preprocess*/
 
