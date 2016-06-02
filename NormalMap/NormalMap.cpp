@@ -73,11 +73,11 @@ int main(void)
 	Shader lampShader("../Common/Shaders/Lamp.vs", "../Common/Shaders/Lamp.fs");
 	Shader normalShader("../Common/Shaders/normal_mapping.vs", "../Common/Shaders/normal_mapping.fs");
 	Shader skyboxShader("../Common/Shaders/skybox.vs", "../Common/Shaders/skybox.fs");
-
+	Shader cubemapShader("../Common/Shaders/cubemap.vs", "../Common/Shaders/cubemap.fs");
 
 
 	GLuint diffuseMap = loadTexture("../Common/images/chessboard_pattern.png");
-	GLuint normalMap = loadTexture("../Common/images/Carbon Fiber_normal.png");
+	GLuint normalMap = loadTexture("../Common/images/height_2.jpg");
 
 	normalShader.Use();
 	glUniform1i(glGetUniformLocation(normalShader.Program, "diffuseMap"), 0);
@@ -130,6 +130,7 @@ int main(void)
 
 	GLfloat vertices[] = {
 		// Positions          // Normals           // Texture Coords
+		//back
 		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
 		0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
 		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
@@ -190,7 +191,7 @@ int main(void)
 
 	// Positions of the point lights
 	glm::vec3 pointLightPositions[] = {
-		glm::vec3(0.7f,  0.2f,  2.0f),
+		glm::vec3(1.7f,  1.2f,  1.0f),
 		glm::vec3(2.3f, -3.3f, -4.0f),
 		glm::vec3(-4.0f,  2.0f, -12.0f),
 		glm::vec3(0.0f,  0.0f, -3.0f)
@@ -327,9 +328,42 @@ int main(void)
 		glDepthMask(GL_TRUE);
 
 
+		///////////////////////////////////////////////////////////////////////////
+		//reflection
+		///////////////////////////////////////////////////////////////////////////
+
+		//cubemapShader.Use();
+		//glm::mat4 modelMatrix;
+		//glm::mat4 viewMatrix = camera.GetViewMatrix();
+		//glm::mat4 projectionMatrix = glm::perspective(camera.Zoom, (GLfloat)WIDTH / HEIGHT, 0.1f, 100.0f);
+
+		//GLint modelLoc = glGetUniformLocation(cubemapShader.Program, "model");
+		//GLint viewLoc = glGetUniformLocation(cubemapShader.Program, "view");
+		//GLint projLoc = glGetUniformLocation(cubemapShader.Program, "projection");
+		//GLint campLoc = glGetUniformLocation(cubemapShader.Program, "cameraPos");
+
+		//glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+		//glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+		//glUniform3f(campLoc, camera.Position.x, camera.Position.y, camera.Position.z);
+
+		//glBindVertexArray(containerVAO);
+		//glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
 
+		//for (GLuint i = 0; i < 10; i++)
+		//{
+		//	modelMatrix = glm::mat4();
+		//	modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
+		//	//GLfloat angle = 20.0f*i;
+		//	modelMatrix = glm::rotate(modelMatrix, angle[i] += rotationRate[i] * deltaTime, glm::vec3(1.0f, 0.3f, 0.5f));
 
+		//	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+		//	glDrawArrays(GL_TRIANGLES, 0, 36);
+		//}
+
+		////////////////////////////////////////////////////////////////////////////
+		//normalMap
+		////////////////////////////////////////////////////////////////////////////
 
 		normalShader.Use();
 			//creat transformations
@@ -341,14 +375,14 @@ int main(void)
 
 		GLint modelLoc = glGetUniformLocation(normalShader.Program, "model");
 		GLint viewLoc = glGetUniformLocation(normalShader.Program, "view");
-		GLint projlLoc = glGetUniformLocation(normalShader.Program, "projection");
+		GLint projLoc = glGetUniformLocation(normalShader.Program, "projection");
 
 		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-		glUniformMatrix4fv(projlLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-		glUniform3fv(glGetUniformLocation(normalShader.Program, "lightPos"), 1, glm::value_ptr(pointLightPositions[3]));
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+		glUniform3fv(glGetUniformLocation(normalShader.Program, "lightPos"), 1, glm::value_ptr(pointLightPositions[0]));
 		glUniform3fv(glGetUniformLocation(normalShader.Program, "viewPos"), 1, &camera.Position[0]);
-		
+
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap);
@@ -360,12 +394,12 @@ int main(void)
 
 		
 
-		for (GLuint i = 0; i < 10; i++)
+		for (GLuint i = 0; i < 1; i++)
 		{
 			modelMatrix = glm::mat4();
 			modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
 			//GLfloat angle = 20.0f*i;
-			modelMatrix = glm::rotate(modelMatrix, angle[i]+=rotationRate[i]*deltaTime, glm::vec3(1.0f, 0.3f, 0.5f));
+			//modelMatrix = glm::rotate(modelMatrix, angle[i]+=rotationRate[i]*deltaTime, glm::vec3(1.0f, 0.3f, 0.5f));
 
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 			glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -379,14 +413,14 @@ int main(void)
 		lampShader.Use();
 		modelLoc = glGetUniformLocation(lampShader.Program, "model");
 		viewLoc = glGetUniformLocation(lampShader.Program, "view");
-		projlLoc = glGetUniformLocation(lampShader.Program, "projection");
+		projLoc = glGetUniformLocation(lampShader.Program, "projection");
 
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-		glUniformMatrix4fv(projlLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
 		glBindVertexArray(lightVAO);
 
-		for (GLuint i = 3; i < 4; i++)
+		for (GLuint i = 0; i < 1; i++)
 		{
 			modelMatrix = glm::mat4();
 			modelMatrix = glm::translate(modelMatrix, pointLightPositions[i]);

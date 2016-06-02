@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Skinny", "Seven\Seven.vcxpr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalMap", "NormalMap\NormalMap.vcxproj", "{791BFE4B-BA17-435A-B747-6FBBCF6B562C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ReliefMap", "ReliefMap\ReliefMap.vcxproj", "{08C04951-A0E4-441C-BFFC-71DE9E495524}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -91,6 +93,14 @@ Global
 		{791BFE4B-BA17-435A-B747-6FBBCF6B562C}.Release|x64.Build.0 = Release|x64
 		{791BFE4B-BA17-435A-B747-6FBBCF6B562C}.Release|x86.ActiveCfg = Release|Win32
 		{791BFE4B-BA17-435A-B747-6FBBCF6B562C}.Release|x86.Build.0 = Release|Win32
+		{08C04951-A0E4-441C-BFFC-71DE9E495524}.Debug|x64.ActiveCfg = Debug|x64
+		{08C04951-A0E4-441C-BFFC-71DE9E495524}.Debug|x64.Build.0 = Debug|x64
+		{08C04951-A0E4-441C-BFFC-71DE9E495524}.Debug|x86.ActiveCfg = Debug|Win32
+		{08C04951-A0E4-441C-BFFC-71DE9E495524}.Debug|x86.Build.0 = Debug|Win32
+		{08C04951-A0E4-441C-BFFC-71DE9E495524}.Release|x64.ActiveCfg = Release|x64
+		{08C04951-A0E4-441C-BFFC-71DE9E495524}.Release|x64.Build.0 = Release|x64
+		{08C04951-A0E4-441C-BFFC-71DE9E495524}.Release|x86.ActiveCfg = Release|Win32
+		{08C04951-A0E4-441C-BFFC-71DE9E495524}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
