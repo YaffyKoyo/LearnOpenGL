@@ -371,7 +371,7 @@ int main(void)
 			modelMatrix = glm::mat4();
 			modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
 			//GLfloat angle = 20.0f*i;
-			//modelMatrix = glm::rotate(modelMatrix, angle[i] += rotationRate[i] * deltaTime, glm::vec3(1.0f, 0.50f, 0.70f));
+			modelMatrix = glm::rotate(modelMatrix, angle[i] += rotationRate[i] * deltaTime, glm::vec3(1.0f, 0.50f, 0.70f));
 
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 			glDrawArrays(GL_TRIANGLES, 0, 36);

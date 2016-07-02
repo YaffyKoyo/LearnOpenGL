@@ -132,7 +132,7 @@ void main()
     // Obtain normal from normal map
     vec3 normal = texture(normalMap, texCoords).rgb;
     normal = normalize(normal * 2.0 - 1.0);   
-   
+   normal= vec3(1,-1,1)*normal;
     // Get diffuse color
     vec3 color = texture(diffuseMap, texCoords).rgb;
     // Ambient

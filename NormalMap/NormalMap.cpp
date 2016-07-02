@@ -77,7 +77,7 @@ int main(void)
 
 
 	GLuint diffuseMap = loadTexture("../Common/images/chessboard_pattern.png");
-	GLuint normalMap = loadTexture("../Common/images/height_2.jpg");
+	GLuint normalMap = loadTexture("../Common/images/brick-normal.jpg");
 
 	normalShader.Use();
 	glUniform1i(glGetUniformLocation(normalShader.Program, "diffuseMap"), 0);
@@ -191,7 +191,7 @@ int main(void)
 
 	// Positions of the point lights
 	glm::vec3 pointLightPositions[] = {
-		glm::vec3(1.7f,  1.2f,  1.0f),
+		glm::vec3(-1.317f,  -0.0f,  1.0f),
 		glm::vec3(2.3f, -3.3f, -4.0f),
 		glm::vec3(-4.0f,  2.0f, -12.0f),
 		glm::vec3(0.0f,  0.0f, -3.0f)
@@ -399,7 +399,7 @@ int main(void)
 			modelMatrix = glm::mat4();
 			modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
 			//GLfloat angle = 20.0f*i;
-			//modelMatrix = glm::rotate(modelMatrix, angle[i]+=rotationRate[i]*deltaTime, glm::vec3(1.0f, 0.3f, 0.5f));
+			modelMatrix = glm::rotate(modelMatrix, angle[i]+=0.314*deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
 
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 			glDrawArrays(GL_TRIANGLES, 0, 36);

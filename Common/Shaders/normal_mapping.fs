@@ -1,4 +1,4 @@
-#version 330 core
+#version 420 core
 out vec4 FragColor;
 
 in VS_OUT {
@@ -20,10 +20,10 @@ void main()
     vec3 normal = texture(normalMap, fs_in.TexCoords).rgb;
     // Transform normal vector to range [-1,1]
     normal = normalize(normal * 2.0 - 1.0);  // this normal is in tangent space
-
+    normal = vec3(1,-1,1)*normal; 
     // Get diffuse color
     vec3 color = texture(diffuseMap, fs_in.TexCoords).rgb;
-    //color = vec3(0.35,0.35,0.35);
+    //color = vec3(0.9,0.83,0.45);
     // Ambient
     vec3 ambient = 0.1 * color;
     // Diffuse
@@ -34,7 +34,7 @@ void main()
     vec3 viewDir = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
     vec3 reflectDir = reflect(-lightDir, normal);
     vec3 halfwayDir = normalize(lightDir + viewDir);  
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
     vec3 specular = vec3(0.2) * spec;
     
     FragColor = vec4(ambient + diffuse + specular, 1.0f);
