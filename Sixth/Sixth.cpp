@@ -12,6 +12,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void RenderScene(Shader & shader);
 void RenderCube();
 void RenderQuad();
+GLuint loadTexture(GLchar* path);
 
 // Camera class
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));

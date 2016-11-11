@@ -22,7 +22,7 @@
     <ProjectGuid>{B2224236-7D9A-4DD4-90BD-1BA98E55E8A0}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Testy</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

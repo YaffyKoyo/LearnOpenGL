@@ -22,7 +22,7 @@
     <ProjectGuid>{348E7031-28BF-4A52-B420-2763C46C1C18}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Seven</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
     <ProjectName>Skinny</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

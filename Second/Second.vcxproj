@@ -22,7 +22,7 @@
     <ProjectGuid>{6FB15098-56BD-46E7-A3BD-3F84E76E8FC2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Second</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
     <ProjectName>Lights</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

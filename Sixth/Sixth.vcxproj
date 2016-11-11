@@ -22,7 +22,7 @@
     <ProjectGuid>{5F6C05BB-2805-4579-97AF-CC1EA3C4FDBC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Sixth</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
     <ProjectName>Shadow</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

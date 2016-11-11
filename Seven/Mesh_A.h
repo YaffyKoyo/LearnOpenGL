@@ -43,7 +43,6 @@ struct VertexBoneData
 				return;
 			}
 		}
-
 		assert(0);
 	}
 };

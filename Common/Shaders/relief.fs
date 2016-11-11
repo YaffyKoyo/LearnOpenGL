@@ -19,7 +19,7 @@ uniform float height_scale;
 bool parallax = true;
 //float height_scale = 0.1f;
 
-vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir, float parallaxHeight)
 { 
     // number of depth layers
     const float minLayers = 20;
@@ -58,7 +58,7 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
     // interpolation of texture coordinates
     float weight = afterDepth / (afterDepth - beforeDepth);
     vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
-
+    parallaxHeight = currentLayerDepth;
     return finalTexCoords;
 }
 
@@ -122,8 +122,9 @@ void main()
     // Offset texture coordinates with Parallax Mapping
     vec3 viewDir = normalize(fs_in.TangentViewPos - fs_in.TangentFragPos);
     vec2 texCoords = fs_in.TexCoords;
+    float parallaxHeight;
     if(parallax)
-        texCoords = ParallaxMapping(fs_in.TexCoords,  viewDir);
+        texCoords = ParallaxMapping(fs_in.TexCoords,  viewDir ,parallaxHeight);
         
     // discards a fragment when sampling outside default texture region (fixes border artifacts)
     if(texCoords.x > 1.0 || texCoords.y > 1.0 || texCoords.x < 0.0 || texCoords.y < 0.0)
@@ -136,7 +137,7 @@ void main()
     // Get diffuse color
     vec3 color = texture(diffuseMap, texCoords).rgb;
     // Ambient
-    vec3 ambient = 0.1 * color;
+    vec3 ambient = 0.2*color;
     // Diffuse
     vec3 lightDir = normalize(fs_in.TangentLightPos - fs_in.TangentFragPos);
     float diff = max(dot(lightDir, normal), 0.0);
@@ -146,13 +147,14 @@ void main()
     vec3 halfwayDir = normalize(lightDir + viewDir);  
     float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
 
-    vec3 specular = vec3(0.2) * spec;
+    vec3 specular = vec3(0.92) * spec;
     
     //float initialHeight = texture(depthMap,fs_in.TexCoords).r;
     
-    //float shadowMultiplier = ParallaxSoftShadowMultiplier(normalize(fs_in.TangentLightPos),texCoords,initialHeight-0.05);
+    float shadowMultiplier = ParallaxSoftShadowMultiplier(lightDir,texCoords,parallaxHeight-0.05);
     
-    //FragColor.rgb = color*(ambient+(diffuse+specular)*pow(shadowMultiplier,4));
-    //FragColor.a = 1;
-    FragColor = vec4(ambient + diffuse + specular, 1.0f);
+    FragColor.rgb = color*(ambient+(diffuse+specular)*pow(shadowMultiplier,4));
+    FragColor.a = 1;
+    //FragColor = vec4(ambient + diffuse + specular, 1.0f);
+
 }

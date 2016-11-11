@@ -22,7 +22,7 @@
     <ProjectGuid>{002A5ADD-BC20-404E-AA3E-196C441C3FD6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Five</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
     <ProjectName>Physics</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
