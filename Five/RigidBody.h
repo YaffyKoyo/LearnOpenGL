@@ -1,5 +1,6 @@
 #pragma once
 #include "Model.h"
+#include "AABB.h"
 
 class RigidBody
 {
@@ -27,8 +28,11 @@ public:
 	/*Computed quantities*/		
 	glm::vec3	force,			/* F(t)*/
 				torque;			/* tau(t)*/
+	
+	AABB *objectAABB;
 
 	void MotionUpdate(float deltaTime);
 	void StateUpdate();
+
 };
 

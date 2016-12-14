@@ -14,9 +14,9 @@
 class AABB {
 public:
 	AABB(vector<glm::vec3> vertexPos) {
-		GLfloat maxX, minX = maxX = vertexPos.front()[0];
+		/*GLfloat maxX, minX = maxX = vertexPos.front()[0];
 		GLfloat maxY, minY = maxY = vertexPos.front()[1];
-		GLfloat maxZ, minZ = maxZ = vertexPos.front()[2];
+		GLfloat maxZ, minZ = maxZ = vertexPos.front()[2];*/
 		for (auto it = vertexPos.begin(); it != vertexPos.end(); ++it)
 		{
 			maxX = std::max(maxX, (*it)[0]);
@@ -26,7 +26,7 @@ public:
 			minX = std::min(minX, (*it)[0]);
 			minY = std::min(minY, (*it)[1]);
 			minZ = std::min(minZ, (*it)[2]);
-			
+
 		}
 
 		cubeFrameVertex[0] = glm::vec3(maxX, maxY, maxZ);
@@ -37,8 +37,8 @@ public:
 		cubeFrameVertex[5] = glm::vec3(minX, maxY, minZ);
 		cubeFrameVertex[6] = glm::vec3(minX, minY, maxZ);
 		cubeFrameVertex[7] = glm::vec3(minX, minY, minZ);
-		
-		
+
+
 		cubeLines.push_back(std::make_pair(cubeFrameVertex[0], cubeFrameVertex[1]));
 		cubeLines.push_back(std::make_pair(cubeFrameVertex[1], cubeFrameVertex[3]));
 		cubeLines.push_back(std::make_pair(cubeFrameVertex[3], cubeFrameVertex[2]));
@@ -66,7 +66,7 @@ public:
 		glColor3f(1, 1, 0);
 		glLineWidth(2);
 		glBegin(GL_LINES);
-		for (auto it = cubeLines.begin(); it !=cubeLines.end(); it++)
+		for (auto it = cubeLines.begin(); it != cubeLines.end(); it++)
 		{
 			glm::vec3 first = (*it).first;
 			glm::vec3 second = (*it).second;
@@ -75,7 +75,21 @@ public:
 		}
 		glEnd();
 	}
+
+	bool CollisionDetectionAABB(AABB otherObjectAABB) {
+		if (
+			otherObjectAABB.minX <= this->maxX && otherObjectAABB.maxX >= this->minX
+			&&otherObjectAABB.minY <= this->maxY && otherObjectAABB.maxY >= this->minY
+			&&otherObjectAABB.minZ <= this->maxZ && otherObjectAABB.maxZ >= this->minZ
+			)
+		{
+			return true;
+		}
+		return false;
+	}
+
 private:
 	glm::vec3 cubeFrameVertex[8];
-	vector<std::pair<glm::vec3,glm::vec3>> cubeLines;
+	GLfloat maxX, maxY, maxZ, minX, minY, minZ;
+	vector<std::pair<glm::vec3, glm::vec3>> cubeLines;
 };

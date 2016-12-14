@@ -116,7 +116,7 @@ int main(void)
 	};
 
 	// Light source
-	glm::vec3 lightPos(0.5f, 0.5f, 0.5f);
+	glm::vec3 lightPos(1.5f, 1.5f, 1.2f);
 
 	glm::vec3 position(0, 0, 0);
 	float angle = 0;
@@ -173,7 +173,7 @@ int main(void)
 		glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 		glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
 		glUniform3f(glGetUniformLocation(modelShader.Program, "pointLights[0].position"), lightPos.x, lightPos.y, lightPos.z);
-		glUniform3f(glGetUniformLocation(modelShader.Program, "pointLights[0].ambient"), 0.15f, 0.15f, 0.15f);
+		glUniform3f(glGetUniformLocation(modelShader.Program, "pointLights[0].ambient"), 0.25f, 0.25f, 0.25f);
 		glUniform3f(glGetUniformLocation(modelShader.Program, "pointLights[0].diffuse"), 1.0f, 1.0f, 1.0f);
 		glUniform3f(glGetUniformLocation(modelShader.Program, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
 		glUniform1f(glGetUniformLocation(modelShader.Program, "pointLights[0].constant"), 1.0f);
@@ -185,8 +185,8 @@ int main(void)
 		modelShader.Use();
 		modelMatrix = glm::mat4(1.0);
 		//modelMatrix = glm::translate(modelMatrix, pointLightPositions[0]);
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5));
-		//modelMatrix = glm::rotate(modelMatrix, angle+=1.57*deltaTime, glm::vec3(0, 0, 1));
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0));
+		modelMatrix = glm::rotate(modelMatrix, angle+=1.57*deltaTime, glm::vec3(0, 1, 1));
 		glUniformMatrix4fv(glGetUniformLocation(modelShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
 		rigidCube->StateUpdate();
@@ -206,11 +206,10 @@ int main(void)
 			glm::vec3 translatedVertex = glm::vec3(modelMatrix*glm::vec4((*it), 1));
 			currentCubeVertexPos.push_back(translatedVertex);
 		}
-		AABB *cubeAABB = new AABB(currentCubeVertexPos);
-
-		cubeAABB->DrawAABB(viewMatrix, projectionMatrix);
+		//cubeAABB->DrawAABB(viewMatrix, projectionMatrix);
 		cube.drawVertex(viewMatrix, projectionMatrix, currentCubeVertexPos);
-
+		
+		rigidCube->objectAABB->DrawAABB(viewMatrix, projectionMatrix);
 
 
 		/* Swap front and back buffers */

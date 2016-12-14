@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "RigidBody.h"
+#include "AABB.h"
 
 
 
@@ -18,6 +19,8 @@ RigidBody::RigidBody(Model *model)
 
 	force = glm::vec3(0, 0, 0);
 	torque = glm::vec3(0, 0, 0);
+
+	objectAABB = new AABB(*object->getAllVertexPos());
 
 }
 
